@@ -6,7 +6,7 @@ let username = document.getElementById('username');
 username.textContent = tg.initDataUnsafe.user.first_name || 'пользователь';
 
 document.getElementById('showAlert').addEventListener('click', () => {
-    tg.showAlert('Убери свой кукурузный початок подальше!');
+    tg.showAlert('hi!');
 });
 
 document.getElementById('sendMessage').addEventListener('click', () => {
