@@ -1,9 +1,3 @@
-if (typeof jQuery === 'undefined') {
-    console.error('jQuery is not loaded');
-} else {
-    // Весь ваш существующий код здесь
-    jQuery(document).ready(function($) {
-
     // Массив строк для вывода
     const lines = [
         'INITIALIZING BIRTHDAY PROTOCOL...',
@@ -113,7 +107,6 @@ if (typeof jQuery === 'undefined') {
     $(document).ready(function() {
         setTimeout(printNextLine, 1000);
     });
-}
 
 
 /*let tg = window.Telegram.WebApp;
