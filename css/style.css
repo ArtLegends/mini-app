@@ -9,19 +9,30 @@ body {
     font-family: 'Courier New', monospace;
     margin: 0;
     padding: 0;
-    /*height: 100vh; */
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overscroll-behavior: none;
+    touch-action: none;
+    /*background-color: #000;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
-    /*touch-action: pan-y pinch-zoom; */
-
     overflow: hidden;
     position: fixed;
     width: 100%;
     height: 100%;
-    touch-action: none;
+    touch-action: none; */
 }
         
 .terminal {
@@ -29,9 +40,21 @@ body {
     border: 2px solid #00ff00;
     border-radius: 10px;
     padding: 15px;
-    /*margin: 10px;*/
-    width: calc(100vw - 20px);  /* полная ширина минус отступы */
-    height: calc(100vh - 20px); /* полная высота минус отступы */
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overscroll-behavior: none;
+    /*background-color: #000;
+    border: 2px solid #00ff00;
+    border-radius: 10px;
+    padding: 15px;
+    width: calc(100vw - 20px);  
+    height: calc(100vh - 20px); 
     max-height: calc(100vh - 20px);
     position: fixed;
     top: 50%;
@@ -40,12 +63,10 @@ body {
     box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
     display: flex;
     flex-direction: column;
-    /*overscroll-behavior: contain;*/
     -webkit-overflow-scrolling: touch;
-
     overscroll-behavior: none;
     position: fixed;
-    touch-action: pan-y;
+    touch-action: pan-y;*/
 }
 
 .terminal-header {
@@ -72,14 +93,24 @@ body {
     word-wrap: break-word;
     overflow-y: auto;
     flex-grow: 1;
-    padding-right: 10px; /* место для скроллбара */
+    padding-right: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #00ff00 #000;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    /*white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-y: auto;
+    flex-grow: 1;
+    padding-right: 10px;
     scrollbar-width: thin;
     scrollbar-color: #00ff00 #000;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
     touch-action: pan-y;
-    overflow-y: auto;
+    overflow-y: auto;*/
 }
 
 /* Стили для скроллбара в WebKit браузерах */
