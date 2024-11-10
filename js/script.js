@@ -42,73 +42,7 @@
     let commandMode = false;
     let currentCommand = '';
     
-    // Функция печати текста
-    function typeText(text, callback) {
-        let index = 0;
-        isTyping = true;
-        
-        function type() {
-            if (index < text.length) {
-                $('#terminal-content').append(text.charAt(index));
-                index++;
-                setTimeout(type, Math.random() * 50 + 30);
-            } else {
-                $('#terminal-content').append('<br>');
-                isTyping = false;
-                if (callback) callback();
-            }
-        }
-        
-        type();
-    }
-    
-    // Функция обработки команд
-    function processCommand(cmd) {
-        const command = cmd.toLowerCase().trim();
-        if (commands[command]) {
-            typeText('> ' + commands[command]);
-        } else {
-            typeText('> Command not found: ' + command);
-        }
-    }
-    
-    // Функция для печати следующей строки
-    function printNextLine() {
-        if (currentLine < lines.length) {
-            typeText(lines[currentLine], () => {
-                currentLine++;
-                if (currentLine < lines.length) {
-                    setTimeout(printNextLine, 1000);
-                } else {
-                    commandMode = true;
-                    $('#terminal-content').append('<br>> ');
-                }
-            });
-        }
-    }
-
-    // Обработка ввода команд
-    $(document).on('keypress', function(e) {
-        if (commandMode && !isTyping) {
-            if (e.which === 13) { // Enter
-                processCommand(currentCommand);
-                currentCommand = '';
-                setTimeout(() => {
-                    $('#terminal-content').append('<br>> ');
-                }, 500);
-            } else {
-                currentCommand += String.fromCharCode(e.which);
-                $('#terminal-content').append(String.fromCharCode(e.which));
-            }
-        }
-    });
-
-    // Запуск анимации при загрузке страницы
-    $(document).ready(function() {
-        setTimeout(printNextLine, 1000);
-    });
-
-// Функция для прокрутки к нижней части терминала
+    // Функция для прокрутки к нижней части терминала
 function scrollToBottom() {
     const terminal = document.getElementById('terminal-content');
     terminal.scrollTop = terminal.scrollHeight;
@@ -149,6 +83,42 @@ function processCommand(cmd) {
         });
     }
 }
+    
+    // Функция для печати следующей строки
+    function printNextLine() {
+        if (currentLine < lines.length) {
+            typeText(lines[currentLine], () => {
+                currentLine++;
+                if (currentLine < lines.length) {
+                    setTimeout(printNextLine, 1000);
+                } else {
+                    commandMode = true;
+                    $('#terminal-content').append('<br>> ');
+                }
+            });
+        }
+    }
+
+    // Обработка ввода команд
+    $(document).on('keypress', function(e) {
+        if (commandMode && !isTyping) {
+            if (e.which === 13) { // Enter
+                processCommand(currentCommand);
+                currentCommand = '';
+                setTimeout(() => {
+                    $('#terminal-content').append('<br>> ');
+                }, 500);
+            } else {
+                currentCommand += String.fromCharCode(e.which);
+                $('#terminal-content').append(String.fromCharCode(e.which));
+            }
+        }
+    });
+
+    // Запуск анимации при загрузке страницы
+    $(document).ready(function() {
+        setTimeout(printNextLine, 1000);
+    });
 
 // Добавляем обработчик изменения размера окна
 window.addEventListener('resize', function() {
