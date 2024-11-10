@@ -42,11 +42,36 @@
     let commandMode = false;
     let currentCommand = '';
     
-    // Функция для прокрутки к нижней части терминала
+// Добавляем глобальные переменные для отслеживания состояния скролла
+let userScrolling = false;
+let lastScrollTop = 0;
+let autoScrollEnabled = true;
+
+// Модифицированная функция прокрутки
 function scrollToBottom() {
     const terminal = document.getElementById('terminal-content');
-    terminal.scrollTop = terminal.scrollHeight;
+    if (autoScrollEnabled && !userScrolling) {
+        terminal.scrollTop = terminal.scrollHeight;
+    }
 }
+
+// Добавляем обработчики событий скролла
+document.getElementById('terminal-content').addEventListener('scroll', function(e) {
+    const terminal = e.target;
+    
+    // Определяем направление скролла
+    if (terminal.scrollTop < lastScrollTop) {
+        // Скролл вверх - пользователь читает
+        userScrolling = true;
+        autoScrollEnabled = false;
+    } else if (terminal.scrollTop + terminal.clientHeight >= terminal.scrollHeight - 50) {
+        // Скролл почти в самом низу - возобновляем автопрокрутку
+        userScrolling = false;
+        autoScrollEnabled = true;
+    }
+    
+    lastScrollTop = terminal.scrollTop;
+});
 
 // Модифицированная функция печати текста
 function typeText(text, callback) {
@@ -56,7 +81,7 @@ function typeText(text, callback) {
     function type() {
         if (index < text.length) {
             $('#terminal-content').append(text.charAt(index));
-            scrollToBottom(); // прокручиваем при каждом новом символе
+            scrollToBottom();
             index++;
             setTimeout(type, Math.random() * 50 + 30);
         } else {
@@ -69,6 +94,13 @@ function typeText(text, callback) {
     
     type();
 }
+
+// Инициализация Telegram WebApp
+let tg = window.Telegram.WebApp;
+tg.expand(); // Расширяем на весь экран
+
+// Отключаем pull-to-refresh
+document.body.style.overscrollBehavior = 'none';
 
 // Модифицированная функция обработки команд
 function processCommand(cmd) {
@@ -124,10 +156,6 @@ function processCommand(cmd) {
 window.addEventListener('resize', function() {
     scrollToBottom();
 });
-
-let tg = window.Telegram.WebApp;
-
-tg.expand();
 
 /*let username = document.getElementById('username');
 username.textContent = tg.initDataUnsafe.user.first_name || 'пользователь';
