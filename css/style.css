@@ -8,6 +8,9 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y pinch-zoom;
 }
         
 .terminal {
@@ -26,6 +29,8 @@ body {
     box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
     display: flex;
     flex-direction: column;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .terminal-header {
@@ -55,6 +60,9 @@ body {
     padding-right: 10px; /* место для скроллбара */
     scrollbar-width: thin;
     scrollbar-color: #00ff00 #000;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
 }
 
 /* Стили для скроллбара в WebKit браузерах */
