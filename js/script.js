@@ -95,9 +95,60 @@ function typeText(text, callback) {
     type();
 }
 
+// Глобальная переменная для Wake Lock
+let wakeLock = null;
+
+// Функция для запроса Wake Lock
+async function requestWakeLock() {
+    try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        console.log('Wake Lock активирован');
+        
+        // Добавляем обработчик для повторного получения Wake Lock при восстановлении видимости страницы
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'visible') {
+                wakeLock = await navigator.wakeLock.request('screen');
+            }
+        });
+    } catch (err) {
+        console.log(`Ошибка Wake Lock: ${err.name}, ${err.message}`);
+    }
+}
+
 // Инициализация Telegram WebApp
 let tg = window.Telegram.WebApp;
-tg.expand(); // Расширяем на весь экран
+
+// Предотвращаем сворачивание через скролл
+document.addEventListener('touchstart', function(e) {
+    const terminal = document.getElementById('terminal-content');
+    if (terminal.scrollTop === 0) {
+        terminal.scrollTop = 1;
+    }
+}, { passive: true });
+
+document.addEventListener('touchmove', function(e) {
+    const terminal = document.getElementById('terminal-content');
+    if (terminal.scrollTop <= 0) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+// Запускаем все инициализации при загрузке страницы
+$(document).ready(function() {
+    // Расширяем на весь экран
+    tg.expand();
+    
+    // Активируем Wake Lock
+    requestWakeLock();
+    
+    // Запускаем анимацию
+    setTimeout(printNextLine, 1000);
+});
+
+// Обработка ошибок Wake Lock
+window.addEventListener('unhandledrejection', function(event) {
+    console.warn('Wake Lock ошибка:', event.reason);
+});
 
 // Отключаем pull-to-refresh
 document.body.style.overscrollBehavior = 'none';
