@@ -108,6 +108,52 @@
         setTimeout(printNextLine, 1000);
     });
 
+// Функция для прокрутки к нижней части терминала
+function scrollToBottom() {
+    const terminal = document.getElementById('terminal-content');
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+// Модифицированная функция печати текста
+function typeText(text, callback) {
+    let index = 0;
+    isTyping = true;
+    
+    function type() {
+        if (index < text.length) {
+            $('#terminal-content').append(text.charAt(index));
+            scrollToBottom(); // прокручиваем при каждом новом символе
+            index++;
+            setTimeout(type, Math.random() * 50 + 30);
+        } else {
+            $('#terminal-content').append('<br>');
+            scrollToBottom();
+            isTyping = false;
+            if (callback) callback();
+        }
+    }
+    
+    type();
+}
+
+// Модифицированная функция обработки команд
+function processCommand(cmd) {
+    const command = cmd.toLowerCase().trim();
+    if (commands[command]) {
+        typeText('> ' + commands[command], () => {
+            scrollToBottom();
+        });
+    } else {
+        typeText('> Command not found: ' + command, () => {
+            scrollToBottom();
+        });
+    }
+}
+
+// Добавляем обработчик изменения размера окна
+window.addEventListener('resize', function() {
+    scrollToBottom();
+});
 
 let tg = window.Telegram.WebApp;
 
