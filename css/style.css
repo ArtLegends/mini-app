@@ -1,16 +1,27 @@
+/* Отключаем стандартное поведение pull-to-refresh */
+* {
+    overscroll-behavior: none;
+}
+
 body {
     background-color: #000;
     color: #00ff00;
     font-family: 'Courier New', monospace;
     margin: 0;
     padding: 0;
-    height: 100vh;
+    /*height: 100vh; */
     display: flex;
     justify-content: center;
     align-items: center;
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
-    touch-action: pan-y pinch-zoom;
+    /*touch-action: pan-y pinch-zoom; */
+
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
 }
         
 .terminal {
@@ -29,8 +40,12 @@ body {
     box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
     display: flex;
     flex-direction: column;
-    overscroll-behavior: contain;
+    /*overscroll-behavior: contain;*/
     -webkit-overflow-scrolling: touch;
+
+    overscroll-behavior: none;
+    position: fixed;
+    touch-action: pan-y;
 }
 
 .terminal-header {
@@ -63,6 +78,8 @@ body {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+    touch-action: pan-y;
+    overflow-y: auto;
 }
 
 /* Стили для скроллбара в WebKit браузерах */
