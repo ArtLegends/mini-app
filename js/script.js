@@ -109,11 +109,11 @@
     });
 
 
-/*let tg = window.Telegram.WebApp;
+let tg = window.Telegram.WebApp;
 
 tg.expand();
 
-let username = document.getElementById('username');
+/*let username = document.getElementById('username');
 username.textContent = tg.initDataUnsafe.user.first_name || 'пользователь';
 
 document.getElementById('showAlert').addEventListener('click', () => {
