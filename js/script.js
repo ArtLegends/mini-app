@@ -96,37 +96,63 @@ function typeText(text, callback) {
     type();
 }
 
-// Модифицируем функцию обработки команд
+// Обновляем функцию обработки команд
 function processCommand(cmd) {
     const command = cmd.toLowerCase().trim();
     if (commands[command]) {
+        // Удаляем старый курсор перед выводом результата команды
+        const cursor = document.getElementById('terminal-cursor');
+        if (cursor) {
+            cursor.remove();
+        }
+        
         typeText('> ' + commands[command], () => {
             scrollToBottom();
-            showCursor(); // Показываем курсор после выполнения команды
+            // Добавляем задержку перед показом нового курсора
+            setTimeout(() => {
+                showCursor();
+            }, 500);
         });
     } else {
+        // Удаляем старый курсор перед выводом сообщения об ошибке
+        const cursor = document.getElementById('terminal-cursor');
+        if (cursor) {
+            cursor.remove();
+        }
+        
         typeText('> Command not found: ' + command, () => {
             scrollToBottom();
-            showCursor(); // Показываем курсор после сообщения об ошибке
+            // Добавляем задержку перед показом нового курсора
+            setTimeout(() => {
+                showCursor();
+            }, 500);
         });
     }
 }
 
-// Функция создания и показа курсора
+// Обновляем функцию показа курсора
 function showCursor() {
     const terminal = document.getElementById('terminal-content');
-    if (!document.getElementById('terminal-cursor')) {
-        const cursor = document.createElement('span');
-        cursor.id = 'terminal-cursor';
-        cursor.className = 'cursor blink';
-        cursor.innerHTML = '&nbsp;';
-        terminal.appendChild(cursor);
+    // Удаляем старый курсор, если он существует
+    const oldCursor = document.getElementById('terminal-cursor');
+    if (oldCursor) {
+        oldCursor.remove();
     }
+    
+    // Добавляем новую строку перед добавлением курсора
     terminal.appendChild(document.createTextNode('\n> '));
+    
+    // Создаем и добавляем новый курсор
+    const cursor = document.createElement('span');
+    cursor.id = 'terminal-cursor';
+    cursor.className = 'cursor blink';
+    cursor.innerHTML = '&nbsp;';
+    terminal.appendChild(cursor);
+    
     scrollToBottom();
 }
 
-// Функция активации ввода
+// Обновляем функцию активации ввода
 function activateInput() {
     if (!inputActive && commandMode && !isTyping) {
         inputActive = true;
@@ -142,6 +168,7 @@ function activateInput() {
         hiddenInput.focus();
         
         hiddenInput.addEventListener('input', function(e) {
+            // Текст теперь будет отображаться в правильном порядке
             currentCommand = this.value;
             updateTerminalLine(currentCommand);
         });
@@ -150,6 +177,12 @@ function activateInput() {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (currentCommand.trim()) {
+                    // Удаляем текущий курсор перед обработкой команды
+                    const cursor = document.getElementById('terminal-cursor');
+                    if (cursor) {
+                        cursor.remove();
+                    }
+                    
                     processCommand(currentCommand);
                     currentCommand = '';
                     this.value = '';
@@ -169,10 +202,11 @@ function activateInput() {
     }
 }
 
-// Функция обновления строки терминала
+// Обновляем функцию обновления строки терминала
 function updateTerminalLine(text) {
     const terminal = document.getElementById('terminal-content');
     const lines = terminal.innerHTML.split('\n');
+    // Исправляем отображение текста (теперь он будет в правильном порядке)
     lines[lines.length - 1] = '> ' + text;
     terminal.innerHTML = lines.join('\n');
     scrollToBottom();
@@ -243,18 +277,17 @@ $(document).ready(function() {
     }, { passive: false });
 });
 
-// Обработка ввода команд
+// Обновляем обработчик клавиатуры для десктопа
 $(document).on('keypress', function(e) {
-    if (commandMode && !isTyping) {
+    if (commandMode && !isTyping && !inputActive) {
         if (e.which === 13) { // Enter
-            processCommand(currentCommand);
-            currentCommand = '';
-            setTimeout(() => {
-                $('#terminal-content').append('<br>> ');
-            }, 500);
+            if (currentCommand.trim()) {
+                processCommand(currentCommand);
+                currentCommand = '';
+            }
         } else {
             currentCommand += String.fromCharCode(e.which);
-            $('#terminal-content').append(String.fromCharCode(e.which));
+            updateTerminalLine(currentCommand);
         }
     }
 });
