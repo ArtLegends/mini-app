@@ -8,6 +8,9 @@ let userScrolling = false;
 let lastScrollTop = 0;
 let autoScrollEnabled = true;
 
+// Добавляем переменную для отслеживания состояния ввода
+let inputActive = false;
+
 // Массив строк для вывода
 const lines = [
     'INITIALIZING BIRTHDAY PROTOCOL...',
@@ -93,21 +96,89 @@ function typeText(text, callback) {
     type();
 }
 
-// Функция обработки команд
+// Модифицируем функцию обработки команд
 function processCommand(cmd) {
     const command = cmd.toLowerCase().trim();
     if (commands[command]) {
         typeText('> ' + commands[command], () => {
             scrollToBottom();
+            showCursor(); // Показываем курсор после выполнения команды
         });
     } else {
         typeText('> Command not found: ' + command, () => {
             scrollToBottom();
+            showCursor(); // Показываем курсор после сообщения об ошибке
         });
     }
 }
 
-// Функция для печати следующей строки
+// Функция создания и показа курсора
+function showCursor() {
+    const terminal = document.getElementById('terminal-content');
+    if (!document.getElementById('terminal-cursor')) {
+        const cursor = document.createElement('span');
+        cursor.id = 'terminal-cursor';
+        cursor.className = 'cursor blink';
+        cursor.innerHTML = '&nbsp;';
+        terminal.appendChild(cursor);
+    }
+    terminal.appendChild(document.createTextNode('\n> '));
+    scrollToBottom();
+}
+
+// Функция активации ввода
+function activateInput() {
+    if (!inputActive && commandMode && !isTyping) {
+        inputActive = true;
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'text';
+        hiddenInput.id = 'hidden-input';
+        hiddenInput.style.position = 'fixed';
+        hiddenInput.style.opacity = '0';
+        hiddenInput.style.height = '0';
+        hiddenInput.style.width = '0';
+        document.body.appendChild(hiddenInput);
+        
+        hiddenInput.focus();
+        
+        hiddenInput.addEventListener('input', function(e) {
+            currentCommand = this.value;
+            updateTerminalLine(currentCommand);
+        });
+        
+        hiddenInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentCommand.trim()) {
+                    processCommand(currentCommand);
+                    currentCommand = '';
+                    this.value = '';
+                    this.blur();
+                    document.body.removeChild(this);
+                    inputActive = false;
+                }
+            }
+        });
+        
+        hiddenInput.addEventListener('blur', function() {
+            if (document.getElementById('hidden-input')) {
+                document.body.removeChild(this);
+                inputActive = false;
+            }
+        });
+    }
+}
+
+// Функция обновления строки терминала
+function updateTerminalLine(text) {
+    const terminal = document.getElementById('terminal-content');
+    const lines = terminal.innerHTML.split('\n');
+    lines[lines.length - 1] = '> ' + text;
+    terminal.innerHTML = lines.join('\n');
+    scrollToBottom();
+}
+
+// Модифицируем функцию печати следующей строки
 function printNextLine() {
     if (currentLine < lines.length) {
         typeText(lines[currentLine], () => {
@@ -116,34 +187,37 @@ function printNextLine() {
                 setTimeout(printNextLine, 1000);
             } else {
                 commandMode = true;
-                $('#terminal-content').append('<br>> ');
+                showCursor(); // Показываем курсор после завершения вывода
             }
         });
     }
 }
 
-// Инициализация при загрузке страницы
+// Обновляем инициализацию при загрузке страницы
 $(document).ready(function() {
     const tg = window.Telegram.WebApp;
     
-    // Предотвращаем сворачивание через скролл
     document.body.style.position = 'fixed';
     document.body.style.overflow = 'hidden';
     document.body.style.width = '100%';
     document.body.style.height = '100%';
     
-    // Расширяем приложение
     tg.expand();
-    
-    // Активируем Wake Lock
     requestWakeLock();
     
-    // Запускаем анимацию
     setTimeout(printNextLine, 1000);
     
-    // Обработчики скролла
     const terminal = document.getElementById('terminal-content');
     
+    // Добавляем обработчик клика по терминалу
+    terminal.addEventListener('click', function(e) {
+        if (commandMode && !isTyping) {
+            activateInput();
+            e.preventDefault();
+        }
+    });
+    
+    // Оставляем существующие обработчики скролла
     terminal.addEventListener('scroll', function(e) {
         if (terminal.scrollTop < lastScrollTop) {
             userScrolling = true;
@@ -155,7 +229,6 @@ $(document).ready(function() {
         lastScrollTop = terminal.scrollTop;
     });
     
-    // Предотвращаем сворачивание при достижении верха
     terminal.addEventListener('touchstart', function(e) {
         if (terminal.scrollTop <= 0) {
             terminal.scrollTop = 1;
