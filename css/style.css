@@ -150,7 +150,7 @@ body {
     width: 8px;
     height: 15px;
     background-color: #00ff00;
-    margin-left: 4px;
+    margin-left: 1px;
     vertical-align: middle;
 }
 
@@ -163,9 +163,16 @@ body {
     opacity: 0;
     height: 0;
     width: 0;
+    left: -1000px;
     z-index: -1;
 }
 
 .terminal-content:focus {
     outline: none;
+}
+
+.input-line {
+    display: flex;
+    align-items: center;
+    white-space: pre;
 }
