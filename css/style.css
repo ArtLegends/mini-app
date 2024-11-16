@@ -163,7 +163,6 @@ body {
     opacity: 0;
     height: 0;
     width: 0;
-    left: -1000px;
     z-index: -1;
 }
 
