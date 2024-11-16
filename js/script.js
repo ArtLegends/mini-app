@@ -98,31 +98,27 @@ function typeText(text, callback) {
 
 // Обновляем функцию обработки команд
 function processCommand(cmd) {
+    // Удаляем текущий курсор
+    const cursor = document.getElementById('terminal-cursor');
+    if (cursor) {
+        cursor.remove();
+    }
+
     const command = cmd.toLowerCase().trim();
+    
+    // Добавляем новую строку перед выводом результата
+    $('#terminal-content').append('\n');
+    
     if (commands[command]) {
-        // Удаляем старый курсор перед выводом результата команды
-        const cursor = document.getElementById('terminal-cursor');
-        if (cursor) {
-            cursor.remove();
-        }
-        
         typeText('> ' + commands[command], () => {
             scrollToBottom();
-            // Добавляем задержку перед показом нового курсора
             setTimeout(() => {
                 showCursor();
             }, 500);
         });
     } else {
-        // Удаляем старый курсор перед выводом сообщения об ошибке
-        const cursor = document.getElementById('terminal-cursor');
-        if (cursor) {
-            cursor.remove();
-        }
-        
         typeText('> Command not found: ' + command, () => {
             scrollToBottom();
-            // Добавляем задержку перед показом нового курсора
             setTimeout(() => {
                 showCursor();
             }, 500);
@@ -133,16 +129,13 @@ function processCommand(cmd) {
 // Обновляем функцию показа курсора
 function showCursor() {
     const terminal = document.getElementById('terminal-content');
-    // Удаляем старый курсор, если он существует
     const oldCursor = document.getElementById('terminal-cursor');
     if (oldCursor) {
         oldCursor.remove();
     }
     
-    // Добавляем новую строку перед добавлением курсора
     terminal.appendChild(document.createTextNode('\n> '));
     
-    // Создаем и добавляем новый курсор
     const cursor = document.createElement('span');
     cursor.id = 'terminal-cursor';
     cursor.className = 'cursor blink';
@@ -168,8 +161,12 @@ function activateInput() {
         hiddenInput.focus();
         
         hiddenInput.addEventListener('input', function(e) {
-            // Текст теперь будет отображаться в правильном порядке
-            currentCommand = this.value;
+            // Для мобильных устройств сохраняем текст в правильном порядке
+            if (/Mobi|Android/i.test(navigator.userAgent)) {
+                currentCommand = this.value.split('').reverse().join('');
+            } else {
+                currentCommand = this.value;
+            }
             updateTerminalLine(currentCommand);
         });
         
@@ -177,10 +174,14 @@ function activateInput() {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (currentCommand.trim()) {
-                    // Удаляем текущий курсор перед обработкой команды
                     const cursor = document.getElementById('terminal-cursor');
                     if (cursor) {
                         cursor.remove();
+                    }
+                    
+                    // Если на мобильном устройстве, разворачиваем команду в правильном порядке
+                    if (/Mobi|Android/i.test(navigator.userAgent)) {
+                        currentCommand = currentCommand.split('').reverse().join('');
                     }
                     
                     processCommand(currentCommand);
@@ -206,7 +207,12 @@ function activateInput() {
 function updateTerminalLine(text) {
     const terminal = document.getElementById('terminal-content');
     const lines = terminal.innerHTML.split('\n');
-    // Исправляем отображение текста (теперь он будет в правильном порядке)
+    // Приводим текст к нижнему регистру
+    text = text.toLowerCase();
+    // На мобильных устройствах исправляем порядок символов
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+        text = text.split('').reverse().join('');
+    }
     lines[lines.length - 1] = '> ' + text;
     terminal.innerHTML = lines.join('\n');
     scrollToBottom();
@@ -286,7 +292,7 @@ $(document).on('keypress', function(e) {
                 currentCommand = '';
             }
         } else {
-            currentCommand += String.fromCharCode(e.which);
+            currentCommand += String.fromCharCode(e.which).toLowerCase();
             updateTerminalLine(currentCommand);
         }
     }
