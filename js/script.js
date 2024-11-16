@@ -128,15 +128,27 @@ function processCommand(cmd) {
 
 // Обновляем функцию показа курсора
 function showCursor() {
-    updateTerminalLine('');
+    const terminal = document.getElementById('terminal-content');
+    const oldCursor = document.getElementById('terminal-cursor');
+    if (oldCursor) {
+        oldCursor.remove();
+    }
+    
+    terminal.appendChild(document.createTextNode('\n> '));
+    
+    const cursor = document.createElement('span');
+    cursor.id = 'terminal-cursor';
+    cursor.className = 'cursor blink';
+    cursor.innerHTML = '&nbsp;';
+    terminal.appendChild(cursor);
+    
+    scrollToBottom();
 }
 
 // Обновляем функцию активации ввода
 function activateInput() {
     if (!inputActive && commandMode && !isTyping) {
         inputActive = true;
-        
-        // Создаём скрытое поле ввода
         const hiddenInput = document.createElement('input');
         hiddenInput.type = 'text';
         hiddenInput.id = 'hidden-input';
@@ -144,15 +156,17 @@ function activateInput() {
         hiddenInput.style.opacity = '0';
         hiddenInput.style.height = '0';
         hiddenInput.style.width = '0';
-        hiddenInput.style.left = '-1000px'; // Прячем подальше от видимой области
         document.body.appendChild(hiddenInput);
         
-        // Устанавливаем текущее значение
-        hiddenInput.value = currentCommand;
         hiddenInput.focus();
         
         hiddenInput.addEventListener('input', function(e) {
-            currentCommand = this.value;
+            // Для мобильных устройств сохраняем текст в правильном порядке
+            if (/Mobi|Android/i.test(navigator.userAgent)) {
+                currentCommand = this.value.split('').reverse().join('');
+            } else {
+                currentCommand = this.value;
+            }
             updateTerminalLine(currentCommand);
         });
         
@@ -160,19 +174,16 @@ function activateInput() {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (currentCommand.trim()) {
-                    // Удаляем текущую строку ввода
-                    const terminal = document.getElementById('terminal-content');
-                    const lines = terminal.innerHTML.split('\n');
-                    lines.pop();
-                    terminal.innerHTML = lines.join('\n');
+                    const cursor = document.getElementById('terminal-cursor');
+                    if (cursor) {
+                        cursor.remove();
+                    }
                     
-                    // Добавляем введенную команду как текст
-                    terminal.appendChild(document.createElement('br'));
-                    const commandLine = document.createElement('div');
-                    commandLine.textContent = '> ' + currentCommand.toLowerCase();
-                    terminal.appendChild(commandLine);
+                    // Если на мобильном устройстве, разворачиваем команду в правильном порядке
+                    if (/Mobi|Android/i.test(navigator.userAgent)) {
+                        currentCommand = currentCommand.split('').reverse().join('');
+                    }
                     
-                    // Обрабатываем команду
                     processCommand(currentCommand);
                     currentCommand = '';
                     this.value = '';
@@ -195,34 +206,15 @@ function activateInput() {
 // Обновляем функцию обновления строки терминала
 function updateTerminalLine(text) {
     const terminal = document.getElementById('terminal-content');
-    // Получаем все строки до текущей
     const lines = terminal.innerHTML.split('\n');
-    lines.pop(); // Удаляем последнюю строку, так как будем её обновлять
-    
-    // Создаём новую строку с текстом и курсором
-    const newLine = document.createElement('div');
-    newLine.className = 'input-line';
-    
-    const prompt = document.createElement('span');
-    prompt.textContent = '> ';
-    newLine.appendChild(prompt);
-    
-    const textSpan = document.createElement('span');
-    textSpan.textContent = text.toLowerCase();
-    newLine.appendChild(textSpan);
-    
-    // Добавляем курсор
-    const cursor = document.createElement('span');
-    cursor.id = 'terminal-cursor';
-    cursor.className = 'cursor blink';
-    cursor.innerHTML = '&nbsp;';
-    newLine.appendChild(cursor);
-    
-    // Обновляем содержимое терминала
+    // Приводим текст к нижнему регистру
+    text = text.toLowerCase();
+    // На мобильных устройствах исправляем порядок символов
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+        text = text.split('').reverse().join('');
+    }
+    lines[lines.length - 1] = '> ' + text;
     terminal.innerHTML = lines.join('\n');
-    if (lines.length > 0) terminal.appendChild(document.createElement('br'));
-    terminal.appendChild(newLine);
-    
     scrollToBottom();
 }
 
@@ -257,15 +249,11 @@ $(document).ready(function() {
     
     const terminal = document.getElementById('terminal-content');
     
-    // Обновляем обработчик клика
+    // Добавляем обработчик клика по терминалу
     terminal.addEventListener('click', function(e) {
-        // Проверяем, не кликнули ли мы по уже существующей строке ввода
-        const clickedElement = e.target;
-        const inputLine = clickedElement.closest('.input-line');
-        
-        if (!inputLine && commandMode && !isTyping) {
-            // Если клик не по строке ввода и разрешён ввод команд
+        if (commandMode && !isTyping) {
             activateInput();
+            e.preventDefault();
         }
     });
     
