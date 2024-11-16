@@ -144,3 +144,28 @@ body {
 .hidden {
     display: none;
 }
+
+.cursor {
+    display: inline-block;
+    width: 8px;
+    height: 15px;
+    background-color: #00ff00;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.cursor.blink {
+    animation: blink 1s infinite;
+}
+
+#hidden-input {
+    position: fixed;
+    opacity: 0;
+    height: 0;
+    width: 0;
+    z-index: -1;
+}
+
+.terminal-content:focus {
+    outline: none;
+}
