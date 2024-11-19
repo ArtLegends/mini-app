@@ -11,6 +11,9 @@ let autoScrollEnabled = true;
 // Добавляем переменную для отслеживания состояния ввода
 let inputActive = false;
 
+let commandHistory = [];
+let currentInputLine = null;
+
 // Массив строк для вывода
 const lines = [
     'INITIALIZING BIRTHDAY PROTOCOL...',
@@ -98,16 +101,13 @@ function typeText(text, callback) {
 
 // Обновляем функцию обработки команд
 function processCommand(cmd) {
-    // Удаляем текущий курсор
-    const cursor = document.getElementById('terminal-cursor');
-    if (cursor) {
-        cursor.remove();
-    }
-
     const command = cmd.toLowerCase().trim();
     
-    // Добавляем новую строку перед выводом результата
-    $('#terminal-content').append('\n');
+    // Создаем новую строку для вывода результата
+    const outputLine = document.createElement('div');
+    outputLine.className = 'output-line';
+    const terminal = document.getElementById('terminal-content');
+    terminal.appendChild(outputLine);
     
     if (commands[command]) {
         typeText('> ' + commands[command], () => {
@@ -149,6 +149,19 @@ function showCursor() {
 function activateInput() {
     if (!inputActive && commandMode && !isTyping) {
         inputActive = true;
+        
+        // Создаем новую строку ввода, если её нет
+        if (!currentInputLine) {
+            currentInputLine = {
+                element: document.createElement('div'),
+                command: ''
+            };
+            currentInputLine.element.className = 'input-line';
+            currentInputLine.element.innerHTML = '> ';
+            const terminal = document.getElementById('terminal-content');
+            terminal.appendChild(currentInputLine.element);
+        }
+        
         const hiddenInput = document.createElement('input');
         hiddenInput.type = 'text';
         hiddenInput.id = 'hidden-input';
@@ -161,12 +174,7 @@ function activateInput() {
         hiddenInput.focus();
         
         hiddenInput.addEventListener('input', function(e) {
-            // Для мобильных устройств сохраняем текст в правильном порядке
-            if (/Mobi|Android/i.test(navigator.userAgent)) {
-                currentCommand = this.value.split('').reverse().join('');
-            } else {
-                currentCommand = this.value;
-            }
+            currentCommand = this.value;
             updateTerminalLine(currentCommand);
         });
         
@@ -174,22 +182,14 @@ function activateInput() {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (currentCommand.trim()) {
-                    const cursor = document.getElementById('terminal-cursor');
-                    if (cursor) {
-                        cursor.remove();
-                    }
-                    
-                    // Если на мобильном устройстве, разворачиваем команду в правильном порядке
-                    if (/Mobi|Android/i.test(navigator.userAgent)) {
-                        currentCommand = currentCommand.split('').reverse().join('');
-                    }
-                    
+                    commandHistory.push(currentCommand);
                     processCommand(currentCommand);
                     currentCommand = '';
                     this.value = '';
                     this.blur();
                     document.body.removeChild(this);
                     inputActive = false;
+                    currentInputLine = null;
                 }
             }
         });
@@ -205,17 +205,15 @@ function activateInput() {
 
 // Обновляем функцию обновления строки терминала
 function updateTerminalLine(text) {
-    const terminal = document.getElementById('terminal-content');
-    const lines = terminal.innerHTML.split('\n');
-    // Приводим текст к нижнему регистру
-    text = text.toLowerCase();
-    // На мобильных устройствах исправляем порядок символов
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-        text = text.split('').reverse().join('');
+    if (currentInputLine) {
+        currentInputLine.command = text;
+        currentInputLine.element.innerHTML = '> ' + text;
+        const cursor = document.createElement('span');
+        cursor.className = 'cursor blink';
+        cursor.innerHTML = '&nbsp;';
+        currentInputLine.element.appendChild(cursor);
+        scrollToBottom();
     }
-    lines[lines.length - 1] = '> ' + text;
-    terminal.innerHTML = lines.join('\n');
-    scrollToBottom();
 }
 
 // Модифицируем функцию печати следующей строки
