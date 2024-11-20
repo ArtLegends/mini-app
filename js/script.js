@@ -158,19 +158,15 @@ function activateInput() {
         hiddenInput.style.width = '0';
         document.body.appendChild(hiddenInput);
         
+        hiddenInput.value = currentCommand; // Сохраняем текущий ввод
         hiddenInput.focus();
         
-        hiddenInput.addEventListener('input', function(e) {
-            // Для мобильных устройств сохраняем текст в правильном порядке
-            if (/Mobi|Android/i.test(navigator.userAgent)) {
-                currentCommand = this.value.split('').reverse().join('');
-            } else {
-                currentCommand = this.value;
-            }
+        hiddenInput.addEventListener('input', function () {
+            currentCommand = this.value; // Просто сохраняем вводимый текст
             updateTerminalLine(currentCommand);
         });
-        
-        hiddenInput.addEventListener('keypress', function(e) {
+
+        hiddenInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (currentCommand.trim()) {
@@ -178,12 +174,6 @@ function activateInput() {
                     if (cursor) {
                         cursor.remove();
                     }
-                    
-                    // Если на мобильном устройстве, разворачиваем команду в правильном порядке
-                    if (/Mobi|Android/i.test(navigator.userAgent)) {
-                        currentCommand = currentCommand.split('').reverse().join('');
-                    }
-                    
                     processCommand(currentCommand);
                     currentCommand = '';
                     this.value = '';
@@ -193,8 +183,8 @@ function activateInput() {
                 }
             }
         });
-        
-        hiddenInput.addEventListener('blur', function() {
+
+        hiddenInput.addEventListener('blur', function () {
             if (document.getElementById('hidden-input')) {
                 document.body.removeChild(this);
                 inputActive = false;
@@ -206,15 +196,12 @@ function activateInput() {
 // Обновляем функцию обновления строки терминала
 function updateTerminalLine(text) {
     const terminal = document.getElementById('terminal-content');
-    const lines = terminal.innerHTML.split('\n');
-    // Приводим текст к нижнему регистру
-    text = text.toLowerCase();
-    // На мобильных устройствах исправляем порядок символов
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-        text = text.split('').reverse().join('');
+    const cursor = document.getElementById('terminal-cursor');
+    
+    // Вставляем текст перед курсором
+    if (cursor) {
+        cursor.previousSibling.textContent = '> ' + text;
     }
-    lines[lines.length - 1] = '> ' + text;
-    terminal.innerHTML = lines.join('\n');
     scrollToBottom();
 }
 
