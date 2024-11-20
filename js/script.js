@@ -157,14 +157,12 @@ function activateInput() {
         hiddenInput.style.height = '0';
         hiddenInput.style.width = '0';
         document.body.appendChild(hiddenInput);
-
-        // Установим текущую команду в поле
-        hiddenInput.value = currentCommand;
+        
+        hiddenInput.value = currentCommand; // Сохраняем текущий ввод
         hiddenInput.focus();
-
+        
         hiddenInput.addEventListener('input', function () {
-            // Сохраняем текст без реверса
-            currentCommand = this.value;
+            currentCommand = this.value; // Просто сохраняем вводимый текст
             updateTerminalLine(currentCommand);
         });
 
@@ -199,15 +197,10 @@ function activateInput() {
 function updateTerminalLine(text) {
     const terminal = document.getElementById('terminal-content');
     const cursor = document.getElementById('terminal-cursor');
-
+    
+    // Вставляем текст перед курсором
     if (cursor) {
-        // Добавляем текст перед курсором
         cursor.previousSibling.textContent = '> ' + text;
-    } else {
-        // Если курсор отсутствует, добавляем новую строку
-        const newLine = document.createElement('div');
-        newLine.textContent = '> ' + text;
-        terminal.appendChild(newLine);
     }
     scrollToBottom();
 }
