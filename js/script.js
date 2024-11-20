@@ -98,86 +98,104 @@ function typeText(text, callback) {
 
 // Обновляем функцию обработки команд
 function processCommand(cmd) {
+    // Удаляем текущий курсор
+    const cursor = document.getElementById('terminal-cursor');
+    if (cursor) {
+        cursor.remove();
+    }
+
     const command = cmd.toLowerCase().trim();
     
-    // Добавляем новую строку с введенной командой
-    $('#terminal-content').append(`\n> ${command}\n`);
+    // Добавляем новую строку перед выводом результата
+    $('#terminal-content').append('\n');
     
     if (commands[command]) {
-        typeText(commands[command], () => {
+        typeText('> ' + commands[command], () => {
             scrollToBottom();
-            createNewInputLine();
+            setTimeout(() => {
+                showCursor();
+            }, 500);
         });
     } else {
-        typeText(`Command not found: ${command}`, () => {
+        typeText('> Command not found: ' + command, () => {
             scrollToBottom();
-            createNewInputLine();
+            setTimeout(() => {
+                showCursor();
+            }, 500);
         });
     }
 }
 
-// Создаем новую строку ввода
-function createNewInputLine() {
-    const terminal = document.getElementById('terminal-content');
-    const inputLine = document.createElement('div');
-    inputLine.className = 'input-line';
-    inputLine.innerHTML = '> <span class="input-text"></span><span class="cursor blink">&nbsp;</span>';
-    terminal.appendChild(inputLine);
-    scrollToBottom();
-}
-
-// Модифицируем функцию показа курсора
+// Обновляем функцию показа курсора
 function showCursor() {
-    createNewInputLine();
+    const terminal = document.getElementById('terminal-content');
+    const oldCursor = document.getElementById('terminal-cursor');
+    if (oldCursor) {
+        oldCursor.remove();
+    }
+    
+    terminal.appendChild(document.createTextNode('\n> '));
+    
+    const cursor = document.createElement('span');
+    cursor.id = 'terminal-cursor';
+    cursor.className = 'cursor blink';
+    cursor.innerHTML = '&nbsp;';
+    terminal.appendChild(cursor);
+    
+    scrollToBottom();
 }
 
 // Обновляем функцию активации ввода
 function activateInput() {
     if (!inputActive && commandMode && !isTyping) {
         inputActive = true;
-        
-        // Создаем скрытое поле ввода
         const hiddenInput = document.createElement('input');
         hiddenInput.type = 'text';
         hiddenInput.id = 'hidden-input';
-        hiddenInput.style.position = 'absolute';
+        hiddenInput.style.position = 'fixed';
         hiddenInput.style.opacity = '0';
-        hiddenInput.style.left = '-9999px';
+        hiddenInput.style.height = '0';
+        hiddenInput.style.width = '0';
         document.body.appendChild(hiddenInput);
         
         hiddenInput.focus();
         
-        // Обработчик ввода текста
         hiddenInput.addEventListener('input', function(e) {
-            currentCommand = this.value;
+            // Для мобильных устройств сохраняем текст в правильном порядке
+            if (/Mobi|Android/i.test(navigator.userAgent)) {
+                currentCommand = this.value.split('').reverse().join('');
+            } else {
+                currentCommand = this.value;
+            }
             updateTerminalLine(currentCommand);
         });
         
-        // Обработчик нажатия Enter
         hiddenInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (currentCommand.trim()) {
-                    // Сохраняем текущее значение
-                    const commandToProcess = currentCommand;
+                    const cursor = document.getElementById('terminal-cursor');
+                    if (cursor) {
+                        cursor.remove();
+                    }
+                    
+                    // Если на мобильном устройстве, разворачиваем команду в правильном порядке
+                    if (/Mobi|Android/i.test(navigator.userAgent)) {
+                        currentCommand = currentCommand.split('').reverse().join('');
+                    }
+                    
+                    processCommand(currentCommand);
                     currentCommand = '';
                     this.value = '';
-                    
-                    // Удаляем скрытое поле ввода
-                    if (document.body.contains(this)) {
-                        document.body.removeChild(this);
-                    }
+                    this.blur();
+                    document.body.removeChild(this);
                     inputActive = false;
-                    
-                    // Обрабатываем команду
-                    processCommand(commandToProcess);
                 }
             }
         });
         
-        // Обработчик потери фокуса
         hiddenInput.addEventListener('blur', function() {
-            if (document.body.contains(this)) {
+            if (document.getElementById('hidden-input')) {
                 document.body.removeChild(this);
                 inputActive = false;
             }
@@ -188,27 +206,17 @@ function activateInput() {
 // Обновляем функцию обновления строки терминала
 function updateTerminalLine(text) {
     const terminal = document.getElementById('terminal-content');
-    const currentInputLine = terminal.querySelector('.input-line:last-child');
-    
-    if (currentInputLine) {
-        const inputText = currentInputLine.querySelector('.input-text');
-        if (inputText) {
-            inputText.textContent = text;
-        }
+    const lines = terminal.innerHTML.split('\n');
+    // Приводим текст к нижнему регистру
+    text = text.toLowerCase();
+    // На мобильных устройствах исправляем порядок символов
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+        text = text.split('').reverse().join('');
     }
+    lines[lines.length - 1] = '> ' + text;
+    terminal.innerHTML = lines.join('\n');
     scrollToBottom();
 }
-
-// Обработчик клика по терминалу
-document.getElementById('terminal-content').addEventListener('click', function(e) {
-    if (commandMode && !isTyping) {
-        const hiddenInput = document.getElementById('hidden-input');
-        if (!hiddenInput) {
-            activateInput();
-        }
-        e.preventDefault();
-    }
-});
 
 // Модифицируем функцию печати следующей строки
 function printNextLine() {
@@ -238,6 +246,41 @@ $(document).ready(function() {
     requestWakeLock();
     
     setTimeout(printNextLine, 1000);
+    
+    const terminal = document.getElementById('terminal-content');
+    
+    // Добавляем обработчик клика по терминалу
+    terminal.addEventListener('click', function(e) {
+        if (commandMode && !isTyping) {
+            activateInput();
+            e.preventDefault();
+        }
+    });
+    
+    // Оставляем существующие обработчики скролла
+    terminal.addEventListener('scroll', function(e) {
+        if (terminal.scrollTop < lastScrollTop) {
+            userScrolling = true;
+            autoScrollEnabled = false;
+        } else if (terminal.scrollTop + terminal.clientHeight >= terminal.scrollHeight - 50) {
+            userScrolling = false;
+            autoScrollEnabled = true;
+        }
+        lastScrollTop = terminal.scrollTop;
+    });
+    
+    terminal.addEventListener('touchstart', function(e) {
+        if (terminal.scrollTop <= 0) {
+            terminal.scrollTop = 1;
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    terminal.addEventListener('touchmove', function(e) {
+        if (terminal.scrollTop <= 0) {
+            e.preventDefault();
+        }
+    }, { passive: false });
 });
 
 // Обновляем обработчик клавиатуры для десктопа
