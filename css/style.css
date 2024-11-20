@@ -173,10 +173,5 @@ body {
 .input-line {
     display: flex;
     align-items: center;
-    /* white-space: pre; */
-}
-
-.input-text {
     white-space: pre;
-    margin-left: 4px;
 }
