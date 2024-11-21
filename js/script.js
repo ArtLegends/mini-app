@@ -22,7 +22,7 @@ const lines = [
     '> RUNNING memory_compilation.sh',
     '> LOADING best_moments.dat',
     '################################',
-    '> You\'re an amazing friend and colleague',
+    '> You\'re an amazing friend and colleague!',
     '> Years of working together: MAXIMUM_VALUE',
     '> Bugs fixed together: INFINITY',
     '> Coffee consumed: OVERFLOW_ERROR',
@@ -35,7 +35,7 @@ const lines = [
     '> Happy debugging of all your dreams!',
     '################################',
     'The application is under development. Stay tuned...',
-    '🎉 🎂 🎈 🎁🎉 🎂 🎈 🎁🎉 🎂 🎈 🎁'
+    '🎉🎂 🎈 🎁🎉 🎂 🎈 🎁🎉 🎂 🎈🎁'
 ];
 
 // Команды терминала
