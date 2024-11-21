@@ -21,19 +21,19 @@ const lines = [
     '> STATUS: Best_Friend_Found',
     '> RUNNING memory_compilation.sh',
     '> LOADING best_moments.dat',
-    '##########################################',
+    '##################################',
     '> You\'ve been an amazing friend and colleague',
     '> Years of coding together: MAXIMUM_VALUE',
     '> Bugs fixed together: INFINITY',
     '> Coffee consumed: OVERFLOW_ERROR',
     '> Friendship level: LEGENDARY',
-    '##########################################',
+    '##################################',
     '> SYSTEM NOTIFICATION:',
     '> Special person detected!',
     '> Initiating birthday celebration sequence...',
     '> Желаю тебе успешной компиляции всех жизненных проектов!',
     '> Happy debugging of all your dreams!',
-    '##########################################',
+    '##################################',
     'Type "help" for available commands...'
 ];
 
@@ -271,7 +271,7 @@ $(document).ready(function() {
 });
 
 // Обновляем обработчик клавиатуры для десктопа
-$(document).on('keypress', function(e) {
+/* $(document).on('keypress', function(e) {
     if (commandMode && !isTyping && !inputActive) {
         if (e.which === 13) { // Enter
             if (currentCommand.trim()) {
@@ -283,7 +283,7 @@ $(document).on('keypress', function(e) {
             updateTerminalLine(currentCommand);
         }
     }
-});
+}); */
 
 // Обработчик изменения размера окна
 window.addEventListener('resize', scrollToBottom);
