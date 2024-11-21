@@ -146,7 +146,7 @@ function showCursor() {
 }
 
 // Обновляем функцию активации ввода
-function activateInput() {
+/* function activateInput() {
     if (!inputActive && commandMode && !isTyping) {
         inputActive = true;
         const hiddenInput = document.createElement('input');
@@ -191,7 +191,7 @@ function activateInput() {
             }
         });
     }
-}
+} */
 
 // Обновляем функцию обновления строки терминала
 function updateTerminalLine(text) {
